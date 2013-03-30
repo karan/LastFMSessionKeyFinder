@@ -34,12 +34,12 @@ public class LastFMSession {
 	 */
 	public static void main(String[] args) throws NoSuchAlgorithmException, IOException, JDOMException {
 
+		System.out.println("API key = " + key);
 		String token = getToken();
 		System.out.println("Token = " + token);
 
 		MessageDigest md = MessageDigest.getInstance("MD5");
 		String apiSig = "api_key" + key + "methodauth.getSessiontoken" + token + secret;
-		System.out.println("API signature = " + apiSig);
 
 		md.update(apiSig.getBytes());
 		byte byteData[] = md.digest();
@@ -48,6 +48,8 @@ public class LastFMSession {
 		for (int i = 0; i < byteData.length; i++) {
 			sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
 		}
+		
+		System.out.println("MD5 Hashed API signature = " + sb.toString());
 
 		String urlToParse = "http://ws.audioscrobbler.com/2.0/?method=auth.getSession&" + 
 				"api_key=" + key + "&api_sig=" + sb.toString() + "&token=" + token;
