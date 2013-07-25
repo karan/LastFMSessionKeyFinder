@@ -32,15 +32,27 @@ public class LastFMSession {
 	 * @throws JDOMException 
 	 * @throws IOException 
 	 */
-	public static void main(String[] args) throws NoSuchAlgorithmException, IOException, JDOMException {
+	public static void main(String[] args) {
 
 		System.out.println("API key = " + key);
-		String token = getToken();
+		String token = null;
+		try {
+			token = getToken();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (JDOMException e) {
+			e.printStackTrace();
+		}
 		System.out.println("Token = " + token);
 
-		MessageDigest md = MessageDigest.getInstance("MD5");
+		MessageDigest md = null;
+		try {
+			md = MessageDigest.getInstance("MD5");
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
 		String apiSig = "api_key" + key + "methodauth.getSessiontoken" + token + secret;
-
+		System.out.println("Unhashed sig: " + apiSig);
 		md.update(apiSig.getBytes());
 		byte byteData[] = md.digest();
 		//convert the byte to hex format
@@ -76,7 +88,7 @@ public class LastFMSession {
 				"api_key=" + key + "&api_sig=" + secret;
 		try {
 			List<Element> list = getList(urlToParse, "auth.gettoken");
-			for (int i = 0; i < list.size(); i++) {
+			for (int i = 0; i < list.size();) {
 				Element node = (Element) list.get(i);
 				return node.getText();
 			}
@@ -94,10 +106,10 @@ public class LastFMSession {
 		SAXBuilder builder = new SAXBuilder();
 		URL website = new URL(urlToParse);
 		ReadableByteChannel rbc = Channels.newChannel(website.openStream());
-		@SuppressWarnings("resource")
 		FileOutputStream fos = new FileOutputStream("request.xml");
 		fos.getChannel().transferFrom(rbc, 0, 1 << 24);
-
+		fos.close();
+		
 		File xmlFile = new File("request.xml");
 
 		Document document = (Document) builder.build(xmlFile);
